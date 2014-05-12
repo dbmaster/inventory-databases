@@ -46,9 +46,7 @@ for (Database database: inventoryDBs) {
      if (apps!=null) {
          println apps.collect { it.getApplication()?.getApplicationName() }.join(", ")
      }
-
      println "</tr>"
-
 }
 
 println "</table>"
