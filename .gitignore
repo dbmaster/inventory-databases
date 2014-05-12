@@ -1,0 +1,9 @@
+.project
+.metadata
+bin/
+tmp/
+target/
+*.tmp
+*.bak
+.classpath
+.settings/

@@ -1,0 +1,14 @@
+<tools>
+    <tool id="inventory-databases" title="Inventory Databases" projectTypes="inventory">
+        <description>List databases from Inventory</description>
+        <parameters>
+            <parameter name="p_query"   title="Query"   type="string" required="false" width="300" />
+
+            <parameter name="p_fields"   title="Fields To Include"   type="string" required="false" width="300" 
+                       defaultValue="Deleted;State;Notes" />
+
+        </parameters>
+
+        <output  script="inventory-databases.groovy" type="html" />
+    </tool>
+</tools>
