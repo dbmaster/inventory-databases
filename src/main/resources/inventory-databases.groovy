@@ -34,7 +34,9 @@ def dbApps = db2AppsLinks.groupBy { it.getDatabase() }
 def contactLinks = dbm.getService(ContactLinkService.class).findAllByClass(Application.class,null)
 def appId2contactLink = contactLinks.groupBy{ contactLink-> contactLink.getApplication().getId()};
  
-fields = p_fields == null ? [] : p_fields.split("[;,]")
+db_fields = p_db_fields == null ? [] : p_db_fields.split("[;,]")
+app_fields = p_app_fields == null ? [] : p_app_fields.split("[;,]")
+con_fields = p_con_fields == null ? [] : p_con_fields.split("[;,]")
 
 println "Total number of databases is ${inventoryDBs.size()} <br/>"
 
@@ -42,11 +44,12 @@ println """<table class="simple-table" cellspacing="0" cellpadding="10">
            <tr style="background-color:#EEE">
              <td>Server</td>
              <td>Database</td>
-             ${fields.collect { "<td>${it}</td>" }.join("")}
-             <td>Applications</td>
+             ${db_fields.collect { "<td>${it}</td>" }.join("")}
+             <td>Application</td>
+             ${app_fields.collect { "<td>${it}</td>" }.join("")}
              <td>Role</td>
              <td>Contact</td>
-             <td>Contact Email</td>
+             ${con_fields.collect { "<td>${it}</td>" }.join("")}
            </tr>"""
 
 for (Database database: inventoryDBs) {
@@ -65,18 +68,20 @@ for (Database database: inventoryDBs) {
             println """<td><a href="#inventory/project:${toURL(projectName)}/servers/server:${toURL(database.getServerName())}">${database.getServerName()}</a></td>"""
             println """<td><a href="#inventory/project:${toURL(projectName)}/databases/server:${toURL(database.getServerName())},db:${toURL(database.getDatabaseName())}">${database.getDatabaseName()}</a></td></td>"""
        
-            fields.each { fieldName -> println "<td>${emptystr(database.getCustomData(fieldName))}</td>" }
+            db_fields.each { fieldName -> println "<td>${emptystr(database.getCustomData(fieldName))}</td>" }
             println "<td>"
             
             if (app!=null){
                 println """<a href="#inventory/project:${toURL(projectName)}/applications/application:${toURL(app.getApplicationName())}">${app.getApplicationName()}</a>""";
+                app_fields.each { fieldName -> println "<td>${emptystr(app.getCustomData(fieldName))}</td>" }
             }
             println "</td>"
        
             if (contactLink!=null){
                 println "<td>${contactLink.getCustomData("ContactRole")}</td>"
-                println """<td><a href="#inventory/project:${toURL(projectName)}/applications/application:${toURL(app.getApplicationName())}/contacts">${contactLink.getContact().getContactName()}</a></td>"""
-                    println "<td>${emptystr(contactLink.getContact().getCustomData(Contact.EMAIL))}</td>"
+                def contact = contactLink.getContact()
+                println """<td><a href="#inventory/project:${toURL(projectName)}/contacts/contact:${contact.getContactName()}">${contact.getContactName()}</a></td>"""
+                con_fields.each { fieldName -> println "<td>${emptystr(contact.getCustomData(fieldName))}</td>" }
             } else {
                 println "<td></td>"
                 println "<td></td>"
