@@ -10,7 +10,7 @@
     <name>Inventory Databases</name>
     <description>Generates a list of databases from inventory</description>
 
-    <version>0.9.3</version>
+    <version>0.10.0</version>
     <packaging>bundle</packaging>
 
     <parent>
