@@ -75,7 +75,7 @@ for (Database database: inventoryDBs) {
         if (app!=null && (contactLink = appId2contactLink.get(app.getId()))!=null){
             println "<td>${contactLink.getCustomData("ContactRole")}</td>"
             println """<td><a href="#inventory/project:${toURL(projectName)}/applications/application:${toURL(app.getApplicationName())}/contacts">${contactLink.getContact().getContactName()}</a></td>"""
-            println "<td>${emptystr(contactLink.getCustomData(Contact.EMAIL))}</td>"
+            println "<td>${emptystr(contactLink.getContact().getCustomData(Contact.EMAIL))}</td>"
         } else {
             println "<td></td>"
             println "<td></td>"
