@@ -32,10 +32,7 @@ String projectName =  dbm.getService(ProjectService.class).getCurrentProject().g
 def db2AppsLinks = inventorySrv.getDBUsageList();
 def dbApps = db2AppsLinks.groupBy { it.getDatabase() }
 def contactLinks = dbm.getService(ContactLinkService.class).findAllByClass(Application.class,null)
-def appId2contactLink = [:];
-for (ContactLink contactLink:contactLinks){
-    appId2contactLink.put(contactLink.getApplication().getId(), contactLink);
-}
+def appId2contactLink = contactLinks.groupBy{ contactLink-> contactLink.getApplication().getId()};
  
 fields = p_fields == null ? [] : p_fields.split("[;,]")
 
@@ -54,34 +51,39 @@ println """<table class="simple-table" cellspacing="0" cellpadding="10">
 
 for (Database database: inventoryDBs) {
     def apps = dbApps[database];
-    if (apps == null){
+    if (apps == null || apps.isEmpty()){
         apps = Collections.singletonList(null);
     }    
-    
     for (DatabaseUsage dbusage: apps){
-        println "<tr>"
-        println """<td><a href="#inventory/project:${toURL(projectName)}/servers/server:${toURL(database.getServerName())}">${database.getServerName()}</a></td>"""
-        println """<td><a href="#inventory/project:${toURL(projectName)}/databases/server:${toURL(database.getServerName())},db:${toURL(database.getDatabaseName())}">${database.getDatabaseName()}</a></td></td>"""
-   
-        fields.each { fieldName -> println "<td>${emptystr(database.getCustomData(fieldName))}</td>" }
-        println "<td>"
         def app = dbusage!=null?dbusage.getApplication():null;
-        if (app!=null){
-            println """<a href="#inventory/project:${toURL(projectName)}/applications/application:${toURL(app.getApplicationName())}">${app.getApplicationName()}</a>""";
+        def contactLinkList = app!=null ? appId2contactLink.get(app.getId()): null;
+        if (contactLinkList == null || contactLinkList.isEmpty()){
+            contactLinkList = Collections.singletonList(null); 
         }
-        println "</td>"
+        for (ContactLink contactLink:contactLinkList){
+            println "<tr>"
+            println """<td><a href="#inventory/project:${toURL(projectName)}/servers/server:${toURL(database.getServerName())}">${database.getServerName()}</a></td>"""
+            println """<td><a href="#inventory/project:${toURL(projectName)}/databases/server:${toURL(database.getServerName())},db:${toURL(database.getDatabaseName())}">${database.getDatabaseName()}</a></td></td>"""
        
-        def contactLink;
-        if (app!=null && (contactLink = appId2contactLink.get(app.getId()))!=null){
-            println "<td>${contactLink.getCustomData("ContactRole")}</td>"
-            println """<td><a href="#inventory/project:${toURL(projectName)}/applications/application:${toURL(app.getApplicationName())}/contacts">${contactLink.getContact().getContactName()}</a></td>"""
-            println "<td>${emptystr(contactLink.getContact().getCustomData(Contact.EMAIL))}</td>"
-        } else {
-            println "<td></td>"
-            println "<td></td>"
-            println "<td></td>"
+            fields.each { fieldName -> println "<td>${emptystr(database.getCustomData(fieldName))}</td>" }
+            println "<td>"
+            
+            if (app!=null){
+                println """<a href="#inventory/project:${toURL(projectName)}/applications/application:${toURL(app.getApplicationName())}">${app.getApplicationName()}</a>""";
+            }
+            println "</td>"
+       
+            if (contactLink!=null){
+                println "<td>${contactLink.getCustomData("ContactRole")}</td>"
+                println """<td><a href="#inventory/project:${toURL(projectName)}/applications/application:${toURL(app.getApplicationName())}/contacts">${contactLink.getContact().getContactName()}</a></td>"""
+                    println "<td>${emptystr(contactLink.getContact().getCustomData(Contact.EMAIL))}</td>"
+            } else {
+                println "<td></td>"
+                println "<td></td>"
+                println "<td></td>"
+            }
+            println "</tr>"
         }
-        println "</tr>"
     }
 }
 
