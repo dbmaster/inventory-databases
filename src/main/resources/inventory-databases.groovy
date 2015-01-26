@@ -1,20 +1,22 @@
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map.Entry;
+import java.util.ArrayList
+import java.util.Iterator
+import java.util.List
+import java.util.Map.Entry
 
-import com.branegy.inventory.api.InventoryService;
-import com.branegy.inventory.model.Database;
-import com.branegy.service.core.QueryRequest;
-import com.branegy.inventory.model.DatabaseUsage;
-import com.branegy.inventory.model.Application;
-import com.branegy.inventory.model.ContactLink;
-import com.branegy.inventory.model.Contact;
-import com.branegy.inventory.api.ContactLinkService;
-import com.branegy.service.base.api.ProjectService;
+import com.branegy.inventory.api.InventoryService
+import com.branegy.inventory.model.Database
+import com.branegy.service.core.QueryRequest
+import com.branegy.inventory.model.DatabaseUsage
+import com.branegy.inventory.model.Application
+import com.branegy.inventory.model.ContactLink
+import com.branegy.inventory.model.Contact
+import com.branegy.inventory.api.ContactLinkService
+import com.branegy.service.base.api.ProjectService
+import com.branegy.cfg.IPropertySupplier
+
 
 def emptystr(obj) {
- return obj==null ? "" : obj;
+    return obj==null ? "" : obj;
 }
 
 def toURL = { link -> link.encodeURL().replaceAll("\\+", "%20") }
@@ -52,6 +54,11 @@ println """<table class="simple-table" cellspacing="0" cellpadding="10">
              ${con_fields.collect { "<td>${it}</td>" }.join("")}
            </tr>"""
 
+def globalProperties = dbm.getService(IPropertySupplier.class)
+def roleField = globalProperties.getProperty("contract_role.role.field_name","ContactRole")
+logger.debug("Will be using field ${roleField}")
+
+
 for (Database database: inventoryDBs) {
     def apps = dbApps[database];
     if (apps == null || apps.isEmpty()){
@@ -63,7 +70,7 @@ for (Database database: inventoryDBs) {
         if (contactLinkList == null || contactLinkList.isEmpty()){
             contactLinkList = Collections.singletonList(null); 
         }
-        for (ContactLink contactLink:contactLinkList){
+        for (ContactLink contactLink:contactLinkList) {
             println "<tr>"
             println """<td><a href="#inventory/project:${toURL(projectName)}/servers/server:${toURL(database.getServerName())}">${database.getServerName()}</a></td>"""
             println """<td><a href="#inventory/project:${toURL(projectName)}/databases/server:${toURL(database.getServerName())},db:${toURL(database.getDatabaseName())}">${database.getDatabaseName()}</a></td></td>"""
@@ -78,7 +85,7 @@ for (Database database: inventoryDBs) {
             println "</td>"
        
             if (contactLink!=null){
-                println "<td>${contactLink.getCustomData("ContactRole")}</td>"
+                println "<td>${contactLink.getCustomData(roleField)}</td>"
                 def contact = contactLink.getContact()
                 println """<td><a href="#inventory/project:${toURL(projectName)}/contacts/contact:${contact.getContactName()}">${contact.getContactName()}</a></td>"""
                 con_fields.each { fieldName -> println "<td>${emptystr(contact.getCustomData(fieldName))}</td>" }
